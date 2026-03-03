@@ -1,6 +1,7 @@
 <div class="row">
   <% for post in @posts %>
     <% user = User.find_by({ "id" => post["user_id"] }) %>
+    <% comments = Comment.where({ "post_id" => post["id"] }) %>
     <div class="col-3">
       <h4>
         <% if user == nil %>
@@ -11,6 +12,32 @@
       </h4>
       <img src="<%= post["image"] %>" class="img-fluid w-full">
       <p><%= post["body"] %></p>
+
+      <p class="mb-1"><strong>Comments</strong></p>
+      <% if comments.count == 0 %>
+        <p class="text-muted">No comments yet.</p>
+      <% else %>
+        <% for comment in comments %>
+          <% comment_user = User.find_by({ "id" => comment["user_id"] }) %>
+          <p class="mb-1">
+            <% if comment_user == nil %>
+              anonymous
+            <% else %>
+              <%= comment_user["first_name"] %>
+            <% end %>: <%= comment["body"] %>
+          </p>
+        <% end %>
+      <% end %>
+
+      <% if @current_user != nil %>
+        <form action="/comments" method="post" class="mt-2">
+          <input type="hidden" name="post_id" value="<%= post["id"] %>">
+          <input type="text" name="body" placeholder="Add a comment">
+          <button>Comment</button>
+        </form>
+      <% else %>
+        <p class="mt-2"><a href="/login">Login</a> to comment.</p>
+      <% end %>
     </div>
   <% end %>
 </div>
